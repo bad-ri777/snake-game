@@ -1,7 +1,7 @@
 import curses
 import time
 
-from engine import GameState, change_direction, move, new_game
+from engine import GameState, change_direction, move, new_game, toggle_pause
 from renderer import draw, draw_game_over, init_colors
 
 KEY_DIRS = {
@@ -15,12 +15,12 @@ KEY_DIRS = {
 def compute_delay(state: GameState) -> float:
     return 0.1
 
-
 def handle_input(state: GameState, key: int) -> GameState:
     if key in KEY_DIRS:
         return change_direction(state, KEY_DIRS[key])
+    if key == ord("p"):
+        return toggle_pause(state)
     return state
-
 
 def main(stdscr):
     curses.curs_set(0)
@@ -35,7 +35,8 @@ def main(stdscr):
     while state.alive:
         key = stdscr.getch()
         state = handle_input(state, key)
-        state = move(state)
+        if not state.paused:
+            state = move(state)
         draw(stdscr, state)
         time.sleep(compute_delay(state))
 
